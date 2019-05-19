@@ -11,7 +11,7 @@ import UIKit
 extension UIView {
     
     @discardableResult
-    open func anchor(top: NSLayoutYAxisAnchor? = nil, leading: NSLayoutXAxisAnchor? = nil, bottom: NSLayoutYAxisAnchor? = nil, trailing: NSLayoutXAxisAnchor? = nil, padding: UIEdgeInsets = .zero, size: CGSize = .zero) -> AnchoredConstraints {
+    open func anchor(top: NSLayoutYAxisAnchor? = nil, leading: NSLayoutXAxisAnchor? = nil, bottom: NSLayoutYAxisAnchor? = nil, trailing: NSLayoutXAxisAnchor? = nil,centerX:NSLayoutXAxisAnchor? = nil,centerY:NSLayoutYAxisAnchor? = nil, padding: UIEdgeInsets = .zero, size: CGSize = .zero) -> AnchoredConstraints {
         
         translatesAutoresizingMaskIntoConstraints = false
         var anchoredConstraints = AnchoredConstraints()
@@ -32,6 +32,14 @@ extension UIView {
             anchoredConstraints.trailing = trailingAnchor.constraint(equalTo: trailing, constant: -padding.right)
         }
         
+        if let centerX = centerX{
+            anchoredConstraints.centerX = centerXAnchor.constraint(equalTo: centerX)
+        }
+        
+        if let centerY = centerY{
+            anchoredConstraints.centerY = centerYAnchor.constraint(equalTo: centerY)
+        }
+        
         if size.width != 0 {
             anchoredConstraints.width = widthAnchor.constraint(equalToConstant: size.width)
         }
@@ -45,31 +53,22 @@ extension UIView {
         return anchoredConstraints
     }
     
-    @discardableResult
-    open func fillSuperview(padding: UIEdgeInsets = .zero) -> AnchoredConstraints {
-        translatesAutoresizingMaskIntoConstraints = false
-        let anchoredConstraints = AnchoredConstraints()
-        guard let superviewTopAnchor = superview?.topAnchor,
-            let superviewBottomAnchor = superview?.bottomAnchor,
-            let superviewLeadingAnchor = superview?.leadingAnchor,
-            let superviewTrailingAnchor = superview?.trailingAnchor else {
-                return anchoredConstraints
-        }
-        
-        return anchor(top: superviewTopAnchor, leading: superviewLeadingAnchor, bottom: superviewBottomAnchor, trailing: superviewTrailingAnchor, padding: padding)
-    }
     
     @discardableResult
-    open func fillSuperviewSafeAreaLayoutGuide(padding: UIEdgeInsets = .zero) -> AnchoredConstraints {
-        let anchoredConstraints = AnchoredConstraints()
-        guard let superviewTopAnchor = superview?.safeAreaLayoutGuide.topAnchor,
+    open func fillSuperview(padding: UIEdgeInsets = .zero) -> AnchoredConstraints {
+        if let superviewTopAnchor = superview?.safeAreaLayoutGuide.topAnchor,
             let superviewBottomAnchor = superview?.safeAreaLayoutGuide.bottomAnchor,
             let superviewLeadingAnchor = superview?.safeAreaLayoutGuide.leadingAnchor,
-            let superviewTrailingAnchor = superview?.safeAreaLayoutGuide.trailingAnchor else {
-                return anchoredConstraints
+            let superviewTrailingAnchor = superview?.safeAreaLayoutGuide.trailingAnchor {
+            return anchor(top: superviewTopAnchor, leading: superviewLeadingAnchor, bottom: superviewBottomAnchor, trailing: superviewTrailingAnchor, padding: padding)
         }
-        return anchor(top: superviewTopAnchor, leading: superviewLeadingAnchor, bottom: superviewBottomAnchor, trailing: superviewTrailingAnchor, padding: padding)
-        
+        if let superviewTopAnchor = superview?.topAnchor,
+            let superviewBottomAnchor = superview?.bottomAnchor,
+            let superviewLeadingAnchor = superview?.leadingAnchor,
+            let superviewTrailingAnchor = superview?.trailingAnchor {
+            return anchor(top: superviewTopAnchor, leading: superviewLeadingAnchor, bottom: superviewBottomAnchor, trailing: superviewTrailingAnchor, padding: padding)
+        }
+        return AnchoredConstraints()
     }
     
     open func centerInSuperview(size: CGSize = .zero) {
@@ -103,6 +102,30 @@ extension UIView {
         if let superviewCenterYAnchor = superview?.centerYAnchor {
             centerYAnchor.constraint(equalTo: superviewCenterYAnchor).isActive = true
         }
+    }
+    
+    @discardableResult
+    open func height(multiplier:CGFloat) -> AnchoredConstraints? {
+        translatesAutoresizingMaskIntoConstraints = false
+        guard let heightAnchor = superview?.heightAnchor else {
+            return nil
+        }
+        var anchoredConstraints = AnchoredConstraints()
+        anchoredConstraints.height = heightAnchor.constraint(equalTo: heightAnchor, multiplier: multiplier)
+        anchoredConstraints.height?.isActive = true
+        return anchoredConstraints
+    }
+    
+    @discardableResult
+    open func width(multiplier:CGFloat) -> AnchoredConstraints? {
+        translatesAutoresizingMaskIntoConstraints = false
+        guard let width = superview?.widthAnchor else {
+            return nil
+        }
+        var anchoredConstraints = AnchoredConstraints()
+        anchoredConstraints.width = widthAnchor.constraint(equalTo: width, multiplier: multiplier)
+        anchoredConstraints.width?.isActive = true
+        return anchoredConstraints
     }
     
     @discardableResult
